@@ -1,0 +1,51 @@
+
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project> cd PHOTOGRAPHY
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project\PHOTOGRAPHY> git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+  (commit or discard the untracked or modified content in submodules)
+        deleted:    HELPS/MOSFETs in photography.md
+        modified:   PHOTOGRAPHY (modified content, untracked content)
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        MY CLICKS/
+
+no changes added to commit (use "git add" and/or "git commit -a")
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project\PHOTOGRAPHY> git add .
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project\PHOTOGRAPHY> git commit -m "1"
+[master 8ee30eb] 1
+ 4 files changed, 48 deletions(-)
+ delete mode 100644 HELPS/MOSFETs in photography.md
+ create mode 100644 MY CLICKS/DP.PNG
+ create mode 100644 MY CLICKS/IMG_20250602_064457318.jpg
+ create mode 100644 MY CLICKS/jg.JPG
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project\PHOTOGRAPHY> git push
+Enumerating objects: 7, done.
+Counting objects: 100% (7/7), done.
+Delta compression using up to 12 threads
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (6/6), 5.45 MiB | 2.37 MiB/s, done.
+Total 6 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+To https://github.com/Myckey-Nikki/PHOTOGRAPHY.git
+   d115b0f..8ee30eb  master -> master
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project\PHOTOGRAPHY> cd ..
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project> git add PHOTOGRAPHY
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project> git commit -m "1"
+[main 2862e3f] 1
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project>  git push origin HEAD:master
+Enumerating objects: 3, done.
+Counting objects: 100% (3/3), done.
+Delta compression using up to 12 threads
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (2/2), 244 bytes | 244.00 KiB/s, done.
+Total 2 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+To https://github.com/Myckey-Nikki/Programming-student-.git
+   4429d92..2862e3f  HEAD -> master

@@ -1,0 +1,24 @@
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project\PHOTOGRAPHY> git checkout master
+error: pathspec 'master' did not match any file(s) known to git
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project\PHOTOGRAPHY> git branch
+* main
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project\PHOTOGRAPHY> git branch -M master
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project\PHOTOGRAPHY> git branch
+* master
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project\PHOTOGRAPHY> git push -u origin master
+Total 0 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+remote:
+remote: Create a pull request for 'master' on GitHub by visiting:
+remote:      https://github.com/Myckey-Nikki/PHOTOGRAPHY/pull/new/master
+remote:
+To https://github.com/Myckey-Nikki/PHOTOGRAPHY.git
+ * [new branch]      master -> master
+branch 'master' set up to track 'origin/master'.
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project\PHOTOGRAPHY> git push origin --delete main
+To https://github.com/Myckey-Nikki/PHOTOGRAPHY.git
+ ! [remote rejected] main (refusing to delete the current branch: refs/heads/main)
+error: failed to push some refs to 'https://github.com/Myckey-Nikki/PHOTOGRAPHY.git'
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project\PHOTOGRAPHY> git push origin --delete main
+To https://github.com/Myckey-Nikki/PHOTOGRAPHY.git
+ - [deleted]         main
+PS C:\Users\chana\OneDrive\Attachments\Desktop\My project\PHOTOGRAPHY>
