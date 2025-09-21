@@ -1,0 +1,1 @@
+ GitHub Actions workflow step-by-step in plain terms, especially for a C project. Think of it as setting up a robot that automatically compiles and tests your code every time you push changes to GitHub.
