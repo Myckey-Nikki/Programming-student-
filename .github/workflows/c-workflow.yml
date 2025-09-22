@@ -1,0 +1,25 @@
+name: C Compile and Debug (Windows)
+
+on: [push, pull_request]
+
+jobs:
+  build-debug:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up MSVC (Microsoft C Compiler)
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Compile C code
+        run: cl /Zi /Fe:main.exe main.c
+
+      - name: Run executable
+        run: main.exe
+
+      - name: Debug with PDB
+        run: |
+          echo "Debug symbols generated in main.pdb"
+          dir main.pdb
