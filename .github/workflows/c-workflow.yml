@@ -24,7 +24,10 @@ jobs:
       # Step 3: Compile all C files in C_BASICS folder
       - name: Compile C files
         run: |
+          # Create folders if they don't exist
           if (!(Test-Path build)) { New-Item -ItemType Directory -Path build }
+          if (!(Test-Path "C_tests")) { New-Item -ItemType Directory -Path "C_tests" }
+
           $report = "C_tests\workflow_report_$($env:RUN_NUMBER).txt"
           "Workflow Report - Branch: $($env:BRANCH_NAME)" | Out-File $report
           "Run Number: $($env:RUN_NUMBER)" | Out-File $report -Append
