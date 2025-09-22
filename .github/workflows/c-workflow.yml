@@ -1,6 +1,10 @@
-name: Build & Test C_BASICS - ${{ github.ref_name }} - Run #${{ github.run_number }}
+name: Build & Test C_BASICS - Run #${{ github.run_number }}
 
 on: [push, pull_request]
+
+env:
+  BRANCH_NAME: ${{ github.ref_name }}
+  RUN_NUMBER: ${{ github.run_number }}
 
 jobs:
   build-debug:
@@ -17,14 +21,15 @@ jobs:
         with:
           arch: x64
 
-      # Step 3: Compile all C files in C_BASICS folder (PowerShell)
+      # Step 3: Compile all C files in C_BASICS folder
       - name: Compile C files
         run: |
           if (!(Test-Path build)) { New-Item -ItemType Directory -Path build }
-          $report = "C_tests\workflow_report_${{ github.run_number }}.txt"
-          "Workflow Report - Branch: $($env:GITHUB_REF_NAME)" | Out-File $report
-          "Run Number: $($env:GITHUB_RUN_NUMBER)" | Out-File $report -Append
+          $report = "C_tests\workflow_report_$($env:RUN_NUMBER).txt"
+          "Workflow Report - Branch: $($env:BRANCH_NAME)" | Out-File $report
+          "Run Number: $($env:RUN_NUMBER)" | Out-File $report -Append
           "Compiled files:" | Out-File $report -Append
+
           Get-ChildItem -Path "C_BASICS" -Filter "*.c" | ForEach-Object {
             $fname = $_.BaseName
             " - $($_.Name)" | Out-File $report -Append
@@ -40,7 +45,7 @@ jobs:
       # Step 4: Run all executables and capture output
       - name: Run executables
         run: |
-          $report = "C_tests\workflow_report_${{ github.run_number }}.txt"
+          $report = "C_tests\workflow_report_$($env:RUN_NUMBER).txt"
           "Program outputs:" | Out-File $report -Append
           Get-ChildItem -Path "build" -Filter "*.exe" | ForEach-Object {
             $exe = $_.FullName
@@ -53,7 +58,7 @@ jobs:
       # Step 5: Automated Testing (optional)
       - name: Automated Testing
         run: |
-          $report = "C_tests\workflow_report_${{ github.run_number }}.txt"
+          $report = "C_tests\workflow_report_$($env:RUN_NUMBER).txt"
           "Test results:" | Out-File $report -Append
           $errors = 0
           Get-ChildItem -Path "build" -Filter "*.output.txt" | ForEach-Object {
@@ -77,7 +82,7 @@ jobs:
       # Step 6: List debug symbols
       - name: Debug info
         run: |
-          $report = "C_tests\workflow_report_${{ github.run_number }}.txt"
+          $report = "C_tests\workflow_report_$($env:RUN_NUMBER).txt"
           "Debug symbols generated (PDB files):" | Out-File $report -Append
           Get-ChildItem build -Filter "*.pdb" | ForEach-Object {
             $_.Name | Out-File $report -Append
