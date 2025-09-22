@@ -1,4 +1,4 @@
-name: C Compile, Run & Test (Windows - PowerShell)
+name: Build & Test C_BASICS - ${{ github.ref_name }} - Run #${{ github.run_number }}
 
 on: [push, pull_request]
 
@@ -7,8 +7,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # Step 1: Checkout code
-      - name: Checkout repository
+      # Step 1: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
       # Step 2: Set up MSVC (64-bit)
@@ -20,54 +20,65 @@ jobs:
       # Step 3: Compile all C files in C_BASICS folder (PowerShell)
       - name: Compile C files
         run: |
-          Write-Host "Compiling all C files in C_BASICS folder..."
           if (!(Test-Path build)) { New-Item -ItemType Directory -Path build }
+          $report = "C_tests\workflow_report_${{ github.run_number }}.txt"
+          "Workflow Report - Branch: $($env:GITHUB_REF_NAME)" | Out-File $report
+          "Run Number: $($env:GITHUB_RUN_NUMBER)" | Out-File $report -Append
+          "Compiled files:" | Out-File $report -Append
           Get-ChildItem -Path "C_BASICS" -Filter "*.c" | ForEach-Object {
             $fname = $_.BaseName
-            Write-Host "Compiling $($_.Name)..."
+            " - $($_.Name)" | Out-File $report -Append
             cl /Zi /W4 /Fe:("build\" + $fname + ".exe") $_.FullName
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            if ($LASTEXITCODE -ne 0) { 
+              "Compilation failed for $($_.Name)" | Out-File $report -Append
+              exit $LASTEXITCODE 
+            } else {
+              "Compilation succeeded for $($_.Name)" | Out-File $report -Append
+            }
           }
-          Write-Host "Compilation finished."
-          Get-ChildItem build
 
-      # Step 4: Run all executables
+      # Step 4: Run all executables and capture output
       - name: Run executables
         run: |
-          Write-Host "Running executables..."
+          $report = "C_tests\workflow_report_${{ github.run_number }}.txt"
+          "Program outputs:" | Out-File $report -Append
           Get-ChildItem -Path "build" -Filter "*.exe" | ForEach-Object {
             $exe = $_.FullName
             $fname = $_.BaseName
-            Write-Host "Running $($_.Name)..."
             & $exe > "build\$fname.output.txt"
-            Get-Content "build\$fname.output.txt"
+            "Output for $fname.exe:" | Out-File $report -Append
+            Get-Content "build\$fname.output.txt" | Out-File $report -Append
           }
 
       # Step 5: Automated Testing (optional)
       - name: Automated Testing
         run: |
-          Write-Host "Checking outputs against expected results..."
+          $report = "C_tests\workflow_report_${{ github.run_number }}.txt"
+          "Test results:" | Out-File $report -Append
           $errors = 0
           Get-ChildItem -Path "build" -Filter "*.output.txt" | ForEach-Object {
             $outputFile = $_.FullName
             $fname = $_.BaseName
             $expectedFile = "C_tests\$fname.expected.txt"
             if (Test-Path $expectedFile) {
-              Write-Host "Comparing $outputFile with $expectedFile..."
               $diff = Compare-Object (Get-Content $outputFile) (Get-Content $expectedFile)
               if ($diff) {
-                Write-Host "Mismatch found for $fname"
+                "Mismatch found for $fname.exe" | Out-File $report -Append
                 $errors++
+              } else {
+                "Test passed for $fname.exe" | Out-File $report -Append
               }
             } else {
-              Write-Host "No expected output for $fname, skipping test."
+              "No expected output for $fname.exe, skipped test" | Out-File $report -Append
             }
           }
           if ($errors -ne 0) { exit 1 }
-          Write-Host "All tests passed!"
 
       # Step 6: List debug symbols
       - name: Debug info
         run: |
-          Write-Host "Debug symbols generated (PDB files):"
-          Get-ChildItem build -Filter "*.pdb"
+          $report = "C_tests\workflow_report_${{ github.run_number }}.txt"
+          "Debug symbols generated (PDB files):" | Out-File $report -Append
+          Get-ChildItem build -Filter "*.pdb" | ForEach-Object {
+            $_.Name | Out-File $report -Append
+          }
