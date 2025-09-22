@@ -1,4 +1,4 @@
-name: C Compile, Run & Test (Windows)
+name: C Compile, Run & Test (Windows - PowerShell)
 
 on: [push, pull_request]
 
@@ -7,8 +7,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # Step 1: Checkout repository
-      - name: Checkout code
+      # Step 1: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       # Step 2: Set up MSVC (64-bit)
@@ -17,48 +17,57 @@ jobs:
         with:
           arch: x64
 
-      # Step 3: Compile all C files in C_BASICS folder
+      # Step 3: Compile all C files in C_BASICS folder (PowerShell)
       - name: Compile C files
         run: |
-          echo "Compiling all C files in C_BASICS folder..."
-          mkdir build
-          for %%f in (C_BASICS\*.c) do (
-            set fname=%%~nf
-            cl /Zi /W4 /Fe:build\%%~nf.exe %%f || exit /b 1
-          )
-          echo "Compilation finished. Executables and PDB files:"
-          dir build
+          Write-Host "Compiling all C files in C_BASICS folder..."
+          if (!(Test-Path build)) { New-Item -ItemType Directory -Path build }
+          Get-ChildItem -Path "C_BASICS" -Filter "*.c" | ForEach-Object {
+            $fname = $_.BaseName
+            Write-Host "Compiling $($_.Name)..."
+            cl /Zi /W4 /Fe:("build\" + $fname + ".exe") $_.FullName
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          Write-Host "Compilation finished."
+          Get-ChildItem build
 
-      # Step 4: Run all executables and capture output
+      # Step 4: Run all executables
       - name: Run executables
         run: |
-          echo "Running executables..."
-          for %%f in (build\*.exe) do (
-            echo "Running %%~nf.exe"
-            %%f > build\%%~nf.output.txt
-            type build\%%~nf.output.txt
-          )
+          Write-Host "Running executables..."
+          Get-ChildItem -Path "build" -Filter "*.exe" | ForEach-Object {
+            $exe = $_.FullName
+            $fname = $_.BaseName
+            Write-Host "Running $($_.Name)..."
+            & $exe > "build\$fname.output.txt"
+            Get-Content "build\$fname.output.txt"
+          }
 
       # Step 5: Automated Testing (optional)
       - name: Automated Testing
         run: |
-          echo "Checking outputs against expected results..."
-          set errors=0
-          for %%f in (build\*.output.txt) do (
-            set fname=%%~nf
-            if exist C_tests\%%~nf.expected.txt (
-              echo "Comparing %%~nf.output.txt with C_tests\%%~nf.expected.txt"
-              fc %%f C_tests\%%~nf.expected.txt
-              if errorlevel 1 set /a errors+=1
-            ) else (
-              echo "No expected output file for %%~nf.exe, skipping test."
-            )
-          )
-          if %errors% neq 0 exit /b 1
-          echo "All tests passed!"
+          Write-Host "Checking outputs against expected results..."
+          $errors = 0
+          Get-ChildItem -Path "build" -Filter "*.output.txt" | ForEach-Object {
+            $outputFile = $_.FullName
+            $fname = $_.BaseName
+            $expectedFile = "C_tests\$fname.expected.txt"
+            if (Test-Path $expectedFile) {
+              Write-Host "Comparing $outputFile with $expectedFile..."
+              $diff = Compare-Object (Get-Content $outputFile) (Get-Content $expectedFile)
+              if ($diff) {
+                Write-Host "Mismatch found for $fname"
+                $errors++
+              }
+            } else {
+              Write-Host "No expected output for $fname, skipping test."
+            }
+          }
+          if ($errors -ne 0) { exit 1 }
+          Write-Host "All tests passed!"
 
       # Step 6: List debug symbols
       - name: Debug info
         run: |
-          echo "Debug symbols generated (PDB files):"
-          dir build\*.pdb
+          Write-Host "Debug symbols generated (PDB files):"
+          Get-ChildItem build -Filter "*.pdb"
