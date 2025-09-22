@@ -1,4 +1,4 @@
-name: C Compile and Debug (Windows)
+name: C Compile, Run & Test (Windows)
 
 on: [push, pull_request]
 
@@ -7,19 +7,58 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      # Step 1: Checkout repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up MSVC (Microsoft C Compiler)
+      # Step 2: Set up MSVC (64-bit)
+      - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
 
-      - name: Compile C code
-        run: cl /Zi /Fe:main.exe main.c
-
-      - name: Run executable
-        run: main.exe
-
-      - name: Debug with PDB
+      # Step 3: Compile all C files in C_BASICS folder
+      - name: Compile C files
         run: |
-          echo "Debug symbols generated in main.pdb"
-          dir main.pdb
+          echo "Compiling all C files in C_BASICS folder..."
+          mkdir build
+          for %%f in (C_BASICS\*.c) do (
+            set fname=%%~nf
+            cl /Zi /W4 /Fe:build\%%~nf.exe %%f || exit /b 1
+          )
+          echo "Compilation finished. Executables and PDB files:"
+          dir build
+
+      # Step 4: Run all executables and capture output
+      - name: Run executables
+        run: |
+          echo "Running executables..."
+          for %%f in (build\*.exe) do (
+            echo "Running %%~nf.exe"
+            %%f > build\%%~nf.output.txt
+            type build\%%~nf.output.txt
+          )
+
+      # Step 5: Automated Testing (optional)
+      - name: Automated Testing
+        run: |
+          echo "Checking outputs against expected results..."
+          set errors=0
+          for %%f in (build\*.output.txt) do (
+            set fname=%%~nf
+            if exist C_tests\%%~nf.expected.txt (
+              echo "Comparing %%~nf.output.txt with C_tests\%%~nf.expected.txt"
+              fc %%f C_tests\%%~nf.expected.txt
+              if errorlevel 1 set /a errors+=1
+            ) else (
+              echo "No expected output file for %%~nf.exe, skipping test."
+            )
+          )
+          if %errors% neq 0 exit /b 1
+          echo "All tests passed!"
+
+      # Step 6: List debug symbols
+      - name: Debug info
+        run: |
+          echo "Debug symbols generated (PDB files):"
+          dir build\*.pdb
