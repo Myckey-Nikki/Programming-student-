@@ -1,0 +1,92 @@
+name: Build & Test C_BASICS - Run #${{ github.run_number }}
+
+on: [push, pull_request]
+
+env:
+  BRANCH_NAME: ${{ github.ref_name }}
+  RUN_NUMBER: ${{ github.run_number }}
+
+jobs:
+  build-debug:
+    runs-on: windows-latest
+
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up MSVC (64-bit)
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      # Step 3: Compile all C files in C_BASICS folder
+      - name: Compile C files
+        run: |
+          # Create folders if they don't exist
+          if (!(Test-Path build)) { New-Item -ItemType Directory -Path build }
+          if (!(Test-Path "C_tests")) { New-Item -ItemType Directory -Path "C_tests" }
+
+          $report = "C_tests\workflow_report_$($env:RUN_NUMBER).txt"
+          "Workflow Report - Branch: $($env:BRANCH_NAME)" | Out-File $report
+          "Run Number: $($env:RUN_NUMBER)" | Out-File $report -Append
+          "Compiled files:" | Out-File $report -Append
+
+          Get-ChildItem -Path "C_BASICS" -Filter "*.c" | ForEach-Object {
+            $fname = $_.BaseName
+            " - $($_.Name)" | Out-File $report -Append
+            cl /Zi /W4 /Fe:("build\" + $fname + ".exe") $_.FullName
+            if ($LASTEXITCODE -ne 0) { 
+              "Compilation failed for $($_.Name)" | Out-File $report -Append
+              exit $LASTEXITCODE 
+            } else {
+              "Compilation succeeded for $($_.Name)" | Out-File $report -Append
+            }
+          }
+
+      # Step 4: Run all executables and capture output
+      - name: Run executables
+        run: |
+          $report = "C_tests\workflow_report_$($env:RUN_NUMBER).txt"
+          "Program outputs:" | Out-File $report -Append
+          Get-ChildItem -Path "build" -Filter "*.exe" | ForEach-Object {
+            $exe = $_.FullName
+            $fname = $_.BaseName
+            & $exe > "build\$fname.output.txt"
+            "Output for $fname.exe:" | Out-File $report -Append
+            Get-Content "build\$fname.output.txt" | Out-File $report -Append
+          }
+
+      # Step 5: Automated Testing (optional)
+      - name: Automated Testing
+        run: |
+          $report = "C_tests\workflow_report_$($env:RUN_NUMBER).txt"
+          "Test results:" | Out-File $report -Append
+          $errors = 0
+          Get-ChildItem -Path "build" -Filter "*.output.txt" | ForEach-Object {
+            $outputFile = $_.FullName
+            $fname = $_.BaseName
+            $expectedFile = "C_tests\$fname.expected.txt"
+            if (Test-Path $expectedFile) {
+              $diff = Compare-Object (Get-Content $outputFile) (Get-Content $expectedFile)
+              if ($diff) {
+                "Mismatch found for $fname.exe" | Out-File $report -Append
+                $errors++
+              } else {
+                "Test passed for $fname.exe" | Out-File $report -Append
+              }
+            } else {
+              "No expected output for $fname.exe, skipped test" | Out-File $report -Append
+            }
+          }
+          if ($errors -ne 0) { exit 1 }
+
+      # Step 6: List debug symbols
+      - name: Debug info
+        run: |
+          $report = "C_tests\workflow_report_$($env:RUN_NUMBER).txt"
+          "Debug symbols generated (PDB files):" | Out-File $report -Append
+          Get-ChildItem build -Filter "*.pdb" | ForEach-Object {
+            $_.Name | Out-File $report -Append
+          }
