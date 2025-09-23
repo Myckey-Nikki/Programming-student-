@@ -1,3 +1,6 @@
 [submodule "PHOTOGRAPHY"]
 	path = PHOTOGRAPHY
 	url = https://github.com/Myckey-Nikki/PHOTOGRAPHY.git
+[submodule "Programming-student-/PHOTOGRAPHY"]
+	path = Programming-student-/PHOTOGRAPHY
+	url = https://github.com/Myckey-Nikki/PHOTOGRAPHY.git
