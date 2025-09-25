@@ -1,0 +1,9 @@
+Write-Host "🔄 Pulling latest changes from submodule..."
+Set-Location -Path ".\languages"
+git pull origin master
+Set-Location -Path ".."
+
+Write-Host "📌 Updating submodule pointer in main repo..."
+git add languages
+git commit -m "Auto-sync languages submodule"
+git push origin master
