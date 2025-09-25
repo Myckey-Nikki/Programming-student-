@@ -1,3 +1,6 @@
 [submodule "PHOTOGRAPHY"]
 	path = PHOTOGRAPHY
 	url = https://github.com/Myckey-Nikki/PHOTOGRAPHY.git
+[submodule "languages"]
+	path = languages
+	url = https://github.com/Myckey-Nikki/languages.git
