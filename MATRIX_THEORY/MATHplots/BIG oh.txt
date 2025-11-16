@@ -1,0 +1,22 @@
+| Big-O          | Name          | Example                               |
+| -------------- | ------------- | ------------------------------------- |
+| **O(1)**       | Constant time | Accessing array element               |
+| **O(log n)**   | Logarithmic   | Binary search                         |
+| **O(n)**       | Linear        | Traversing an array                   |
+| **O(n log n)** | Log-linear    | Merge sort, quicksort (avg)           |
+| **O(n²)**      | Quadratic     | Nested loops on array                 |
+| **O(2ⁿ)**      | Exponential   | Solving recursion without memoization |
+| **O(n!)**      | Factorial     | Brute force traveling salesman        |
+
+
+
+
+
+
+
+
+| Scenario            | Chain Rule Meaning                                                  |
+| ------------------- | ------------------------------------------------------------------- |
+| Robot arm           | End-effector motion depends on joint angles → angles depend on time |
+| Heat in metal plate | Temp = f(x,y). x,y depend on moving point on plate                  |
+| Economics           | Output = f(labor, capital). Labor depends on population growth      |
